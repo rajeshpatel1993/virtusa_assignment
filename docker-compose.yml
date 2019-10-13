@@ -1,0 +1,23 @@
+#docker file for virtusa_assignment
+version: "2"
+services:
+  node:
+    # restart: always
+    mem_limit: 100m
+    build:
+      dockerfile: dockerfile
+      context: .
+
+    environment:
+      - NODE_ENV=dev
+    ports:
+      - '8081:8081'
+
+    links:
+      - mongo
+  mongo:
+    container_name: mongo
+    image: mongo
+    ports:
+      - "27017:27017"
+
