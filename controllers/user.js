@@ -1,4 +1,4 @@
-const path = require('path');
+const { validationResult } = require('express-validator');
 
 const User = require('../models/user');
 
@@ -6,22 +6,13 @@ const User = require('../models/user');
 exports.getUsers = (req, res, next) => {
   User.find()
     .then(users => {
-      res.render('shop/product-list', {
-        prods: products,
-        pageTitle: 'Products',
-        path: '/products',
-        currentPage: page,
-        hasNextPage: ITEMS_PER_PAGE * page < totalItems,
-        hasPreviousPage: page > 1,
-        nextPage: page + 1,
-        previousPage: page - 1,
-        lastPage: Math.ceil(totalItems / ITEMS_PER_PAGE)
-      });
+        res.status(200).json({"message":"List of users", "users":users})
     })
     .catch(err => {
-      const error = new Error(err);
-      error.httpStatusCode = 500;
-      return next(error);
+        if(!err.statusCode) {
+            err.statusCode = 500;
+        }
+        next(err);
     });
 };
 
@@ -30,61 +21,44 @@ exports.getUser = (req, res, next) => {
   const userId = req.params.userId;
   User.findById(userId)
   .then(user=>{
-    res.render('shop/product-detail',{product: product, pageTitle : product.title, path:'/products',isAuthenticated: req.session.isLoggedIn
-  })
+   res.status(200).json({"message":"User", "user":user});
   })
   .catch(err => {
-    const error = new Error(err);
-    error.httpStatusCode = 500;
-    return next(error);
+        if(!err.statusCode) {
+            err.statusCode = 500;
+        }
+       next(err);
   });
 };
 
 
 exports.createUser = (req, res, next) => {
+
+  
+  const errorFormatter = ({ location, msg, param, value, nestedErrors }) => {
+    // Build your resulting errors however you want! String, object, whatever - it works!
+    return `${location}[${param}]: ${msg}`;
+  };
+  const result = validationResult(req).formatWith(errorFormatter);
+  if (!result.isEmpty()) {
+    // Response will contain something like
+    // { errors: [ "body[password]: must be at least 10 chars long" ] }
+    return res.json({ errors: result.array() });
+  }
+
   //fetch user data from body
   let {email, firstname, lastname, address} =  req.body;
 
-  res.json(req.body);
-    
-
-//   req.user
-//     .populate('cart.items.productId')
-//     .execPopulate()
-//     .then(user => {  
-//       user.cart.items.forEach(p => {
-//         totalSum += p.quantity * p.productId.price;
-//       });
-
-//       const products = user.cart.items.map(i => {
-//         return { quantity: i.quantity, product: { ...i.productId._doc } };
-//       });
-//       const order = new Order({
-//         user: {
-//           email: req.user.email,
-//           userId: req.user
-//         },
-//         products: products
-//       });
-//       return order.save();
-//     })
-//     .then(result => {
-//       const charge = stripe.charges.create({
-//         amount: totalSum * 100,
-//         currency: 'usd',
-//         description: 'Demo Order',
-//         source: token,
-//         metadata: { order_id: result._id.toString() }
-//       });
-//       return req.user.clearCart();
-//     })
-//     .then(() => {
-//       res.redirect('/orders');
-//     })
-//     .catch(err => {
-//       const error = new Error(err);
-//       error.httpStatusCode = 500;
-//       return next(error);
-//     });
+  const user = new User({email,firstname,lastname,address});
+  user.save().then(userdata => {
+    if(userdata){
+        res.status(200).json({"message":"created successfully", "userdata":userdata});
+    }
+  }).catch(err =>{
+    if(!err.statusCode) {
+        err.statusCode = 500;
+    }
+   next(err);
+  });
 };
 

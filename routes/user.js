@@ -1,30 +1,34 @@
 const express = require('express');
+const { body, check } = require('express-validator');
 
 const usersController = require('../controllers/user');
 
 const router = express.Router();
 
-// const isAuth = require('../middleware/is-auth');
+const isAuth = require('../middleware/is-auth');
+
+const User = require('../models/user');
 
 
-router.post('/create-user', usersController.createUser);
+router.post('/create-user', [ check('email').isEmail()
+.normalizeEmail()
+.withMessage("please enter valid Email")
+.custom((value,{req}) => {
+    return User.findOne({ email: value }).then(userDoc => {
+        if (userDoc) {
+          return Promise.reject(
+            'E-Mail exists already, please pick a different one.'
+          );
+        }
+      });
 
-// router.get('/products', shopController.getProducts);
+}).trim(), body('firstname')
+.trim()
+.isLength({ min: 3 }) ], usersController.createUser);
 
+router.get('/users',isAuth, usersController.getUsers);
 
-// router.get('/products/:productId', shopController.getProduct);
+router.get('/:userId',isAuth, usersController.getUser);
 
-// router.get('/cart', isAuth, shopController.getCart);
-
-// router.post('/cart-delete-item',isAuth, shopController.postCartDeleteProduct);
-
-
-// router.post('/cart', isAuth,shopController.postCart);
-
-// router.get('/orders', isAuth, shopController.getOrders);
-
-// router.get('/orders/:orderId', isAuth, shopController.getInvoice);
-
-// router.get('/checkout', isAuth, shopController.getCheckout);
 
 module.exports = router;
