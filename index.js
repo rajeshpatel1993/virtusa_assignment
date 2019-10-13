@@ -4,6 +4,13 @@ const bodyParser = require('body-parser');
 const express = require('express');
 const app = express();
 
+//import config
+const config = require("./config/config");
+
+
+const DEV_DB_PORT = config['db'].port;
+const APP_PORT = config['app'].port;
+
 //mongodb connection URI
 const MONGODB_URI = "mongodb://mongo:27017/virtusa_assignment";
 
@@ -29,7 +36,7 @@ app.use((error, req, res, next) => {
 //connect mongodb and listen to the server
 mongoose.connect(MONGODB_URI).
 then(result => {
-    app.listen(process.env.PORT,()=>{
-		console.log(`listening to port ${PORT}`);
+    app.listen(APP_PORT,()=>{
+		console.log(`listening to port ${APP_PORT}`);
 	});
 }).catch(e => console.log(e))
