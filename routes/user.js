@@ -24,7 +24,7 @@ router.post('/create-user', [ check('email').isEmail()
 
 }).trim(), body('firstname')
 .trim()
-.isLength({ min: 3 }) ], usersController.createUser);
+.isLength({ min: 3 }) ], isAuth, usersController.createUser);
 
 router.get('/users',isAuth, usersController.getUsers);
 
