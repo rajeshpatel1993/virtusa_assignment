@@ -14,6 +14,7 @@ Authorization :- somesupersecretsomesupersecrets
 
 1:- create user
 route:- http://localhost:8081/user/create-user
+
 Body:- {
 	"email":"rajesh@tatrasdata1.com",
 	"firstname": "Rajesh1",
