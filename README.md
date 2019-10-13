@@ -36,4 +36,5 @@ Method:- Get
 
 3:- get single user
 route:- http://localhost:8081/user/<userId>
+	
 Method:- Get
